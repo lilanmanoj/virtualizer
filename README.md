@@ -1,7 +1,11 @@
 # virtualizer
 Apache virtual-host (virtualhost) generating script/bash
 
+## Requires
+- sudo access
+- Apache2
+
 ## Steps
-- Requires sudo
 - clone repo and change into the directory
-- in terminal run <code>sudo ./run.sh</code>
+- In terminal run <code>sudo ./run.sh</code>
+- Input directories request and virtual-domain when prompt
