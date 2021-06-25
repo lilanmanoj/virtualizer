@@ -50,6 +50,10 @@ echo "\tServerAlias www.$DOMAIN_NAME" >> $VIRTUALHOST_CONF_FILE
 echo "\tDocumentRoot $PROJECT_DOCUMENT_ROOT" >> $VIRTUALHOST_CONF_FILE
 echo "\tErrorLog ${APACHE_LOG_DIR}/error.log" >> $VIRTUALHOST_CONF_FILE
 echo "\tCustomLog ${APACHE_LOG_DIR}/access.log combined" >> $VIRTUALHOST_CONF_FILE
+echo "\t<Directory $PROJECT_DOCUMENT_ROOT>" >> $VIRTUALHOST_CONF_FILE
+echo "\t\tOptions FollowSymLinks" >> $VIRTUALHOST_CONF_FILE
+echo "\t\tAllowOverride All" >> $VIRTUALHOST_CONF_FILE
+echo "\t</Directory>" >> $VIRTUALHOST_CONF_FILE
 echo "</VirtualHost>" >> $VIRTUALHOST_CONF_FILE
 
 echo "\r\n"
