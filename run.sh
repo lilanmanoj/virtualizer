@@ -10,6 +10,9 @@ DOMAIN_NAME=""
 SITES_AVAIL_DEFAULT_DIR="/etc/apache2/sites-available/"
 HOSTS_FILE="/etc/hosts"
 
+read -p "Enter apache document root [/var/www/html]: " APACHE_DOCUMENT_ROOT
+APACHE_DOCUMENT_ROOT=${APACHE_DOCUMENT_ROOT:-/var/www/html}
+
 until [ $DOMAIN_NAME ]
 do
     echo "Enter virtual domain name (without www):"
@@ -18,7 +21,7 @@ done
 
 until [ $PROJECT_ROOT_DIR ]
 do
-    echo "Enter project root directory:"
+    echo "Enter project document root (public directory):"
     read PROJECT_ROOT_DIR
 done
 
@@ -30,7 +33,10 @@ else
     echo $PROJECT_ROOT_DIR"/"$DOMAIN_NAME".conf directory exist - Done"
 fi
 
-cd $PROJECT_ROOT_DIR
+PROJECT_DOCUMENT_ROOT=$APACHE_DOCUMENT_ROOT"/"$DOMAIN_NAME
+sudo ln -s $PROJECT_ROOT_DIR $PROJECT_DOCUMENT_ROOT
+
+cd $PROJECT_DOCUMENT_ROOT
 
 VIRTUALHOST_CONF_FILE=$DOMAIN_NAME".conf"
 
@@ -41,11 +47,12 @@ echo "<VirtualHost *:80>" >> $VIRTUALHOST_CONF_FILE
 echo "\tServerAdmin admin@$DOMAIN_NAME" >> $VIRTUALHOST_CONF_FILE
 echo "\tServerName $DOMAIN_NAME" >> $VIRTUALHOST_CONF_FILE
 echo "\tServerAlias www.$DOMAIN_NAME" >> $VIRTUALHOST_CONF_FILE
-echo "\tDocumentRoot $PROJECT_ROOT_DIR" >> $VIRTUALHOST_CONF_FILE
+echo "\tDocumentRoot $PROJECT_DOCUMENT_ROOT" >> $VIRTUALHOST_CONF_FILE
 echo "\tErrorLog ${APACHE_LOG_DIR}/error.log" >> $VIRTUALHOST_CONF_FILE
 echo "\tCustomLog ${APACHE_LOG_DIR}/access.log combined" >> $VIRTUALHOST_CONF_FILE
 echo "</VirtualHost>" >> $VIRTUALHOST_CONF_FILE
 
+echo "\r\n"
 echo "Created $VIRTUALHOST_CONF_FILE with host configurations - Done"
 
 if [ -e $SITES_AVAIL_DEFAULT_DIR ]
@@ -58,16 +65,20 @@ else
     return 1
 fi
 
+echo "\r\n"
 echo "Enabling $VIRTUALHOST_CONF_FILE ..."
 a2ensite $VIRTUALHOST_CONF_FILE
 
+echo "\r\n"
 echo "Restarting apache2 ..."
-systemctl restart apache2
+sudo systemctl restart apache2
 
+echo "\r\n"
 echo "Adding hosts file entries for $DOMAIN_NAME in $HOSTS_FILE ..."
 echo "# Host entry for $DOMAIN_NAME added by virtualizer" >> $HOSTS_FILE
 echo "127.0.0.1 $DOMAIN_NAME" >> $HOSTS_FILE
 echo "Added hosts file entries for $DOMAIN_NAME in $HOSTS_FILE - Done"
 
+echo "\r\n"
 echo "run `systemctl status apache2` to verify apache status"
 echo "Process finished!"
